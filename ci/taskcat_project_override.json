@@ -1,0 +1,14 @@
+[
+    {
+        "ParameterKey": "KeyPairName",
+        "ParameterValue": "taskcat-ci-key"
+    },
+    {
+        "ParameterKey": "CustomDnsName",
+        "ParameterValue": "jira-smoke-test-0.deplops.com"
+    },
+    {
+        "ParameterKey": "SSLCertificateARN",
+        "ParameterValue": "arn:aws:acm:us-east-2:887764444972:certificate/6c263722-467c-493b-b09a-1b79e46e9f19"
+    }
+]
