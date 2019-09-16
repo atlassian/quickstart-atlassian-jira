@@ -1318,7 +1318,7 @@ Resources:
       TargetKeyId: !Ref EncryptionKey
 
 # Optional: Cloudwatch dashboard to be created when CloudWatch is enabled
-  CloudwatchDashboard:
+  CloudWatchDashboard:
     DependsOn:
       - DB
     Condition: EnableCloudWatch
@@ -1383,7 +1383,7 @@ Outputs:
     Export: {
       Name: !Join ['', [!Ref 'AWS::StackName', '-EFSCname']]
     }
-  CloudwatchDashboard:
-    Description: Cloudwatch monitoring dashboard URL
-    Value: !GetAtt CloudwatchDashboard.Outputs.Dashboard
+  CloudWatchDashboardURL:
+    Description: CloudWatch monitoring dashboard URL
+    Value: !GetAtt CloudWatchDashboard.Outputs.Dashboard
     Condition: EnableCloudWatch
