@@ -1,14 +1,13 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
-Description: Atlassian Jira Data Center QS(0035)
+Description: Atlassian Crowd Data Center QS(0037)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
-          default: Jira setup
+          default: Crowd setup
         Parameters:
-          - JiraProduct
-          - JiraVersion
+          - CrowdVersion
       - Label:
           default: Cluster nodes
         Parameters:
@@ -152,9 +151,7 @@ Metadata:
         default: Route 53 Hosted Zone
       InternetFacingLoadBalancer:
         default: Make instance internet facing
-      JiraProduct:
-        default: Jira Product *
-      JiraVersion:
+      CrowdVersion:
         default: Version *
       JvmHeapOverride:
         default: JVM Heap Size Override
@@ -206,7 +203,7 @@ Parameters:
     AllowedValues: ["Off", "Metrics Only", "Metrics and Logs"]
     ConstraintDescription: "Must be 'Off', 'Metrics Only', or 'Metrics and Logs'"
   ClusterNodeInstanceType:
-    Default: c5.xlarge
+    Default: t3.medium
     AllowedValues:
       - c4.large
       - c4.xlarge
@@ -326,7 +323,7 @@ Parameters:
     ConstraintDescription: Must be 'Amazon Aurora PostgreSQL' or 'PostgreSQL'.
     Type: String
   DBInstanceClass:
-    Default: db.m5.large
+    Default: db.t2.medium
     AllowedValues:
       - db.m5.large
       - db.m5.xlarge
@@ -386,7 +383,7 @@ Parameters:
     Type: String
   DBMaxWaitMillis:
     Default: 10000
-    Description: The length of time (in milliseconds) that Jira is allowed to wait for a database connection to become available (while there are no free ones available in the pool), before returning an error
+    Description: The length of time (in milliseconds) that Crowd is allowed to wait for a database connection to become available (while there are no free ones available in the pool), before returning an error
     Type: String
   DBMinEvictableIdleTimeMillis:
     Default: 180000
@@ -429,7 +426,7 @@ Parameters:
     Description: The length of time (in seconds) that a database connection can be idle before it is considered abandoned
     Type: String
   DBStorage:
-    Default: 200
+    Default: 20
     Description: Database allocated storage size, in gigabytes (GB). If you choose Provisioned IOPS, storage should be between 100 and 6144 (not used for Aurora).
     Type: Number
   DBStorageEncrypted:
@@ -437,7 +434,7 @@ Parameters:
     AllowedValues:
       - true
       - false
-    Description: Whether or not to encrypt the database
+    Description: Whether to encrypt the database
     Type: String
   DBStorageType:
     Default: General Purpose (SSD)
@@ -449,7 +446,7 @@ Parameters:
     Type: String
   DBTestOnBorrow:
     Default: false
-    Description: Tests if the database connection is valid when it is borrowed from the database connection pool by Jira
+    Description: Tests if the database connection is valid when it is borrowed from the database connection pool by Crowd
     Type: String
   DBTestWhileIdle:
     Default: true
@@ -468,9 +465,9 @@ Parameters:
     Type: String
     Description: The deployment automation repository branch to pull from.
   DeploymentAutomationPlaybook:
-    Default: "aws_jira_dc_node.yml"
+    Default: "aws_crowd_dc_node.yml"
     Type: String
-    Description: The Ansible playbook to invoke to initialize the Jira node on first start.
+    Description: The Ansible playbook to invoke to initialize the Crowd node on first start.
   DeploymentAutomationCustomParams:
     Default: ""
     Type: String
@@ -482,7 +479,7 @@ Parameters:
   ExportPrefix:
     Default: 'ATL-'
     Description:
-      Each Atlassian Standard Infrastructure (ASI) uses a unique identifier. If you have multiple ASIs within the same AWS region, use this field to specify where to deploy Jira.
+      Each Atlassian Standard Infrastructure (ASI) uses a unique identifier. If you have multiple ASIs within the same AWS region, use this field to specify where to deploy Crowd.
     Type: String
   HostedZone:
     Default: ''
@@ -495,20 +492,11 @@ Parameters:
     ConstraintDescription: Must be 'true' or 'false'.
     Description: Controls whether the load balancer should be visible to the internet (true) or only within the VPC (false).
     Type: String
-  JiraProduct:
-    Default: Software
-    Description: The Jira product to install.
-    Type: String
-    ConstraintDescription: 'Must be "Core", "Software", or "ServiceDesk"'
-    AllowedValues:
-      - Core
-      - Software
-      - ServiceDesk
-  JiraVersion:
-    Default: 8.5.3
+  CrowdVersion:
+    Default: 4.0.0
     AllowedPattern: '(\d+\.\d+\.\d+(-?.*))|(latest)'
-    ConstraintDescription: Must be a valid version number or 'latest'; for example, 8.1.0 for Jira Software, or 4.1.0 for ServiceDesk.
-    Description: The version of Jira Software or Jira Service Desk to install. Find valid versions at https://confluence.atlassian.com/x/TVlNLg (Jira Software), https://confluence.atlassian.com/x/jh9-Lg (Jira Service Desk), or https://confluence.atlassian.com/x/XM2EO (Atlassian Enterprise Releases).
+    ConstraintDescription: Must be a valid version number or 'latest'; for example, 4.0.0 for Crowd Software.
+    Description: The version of Crowd Software to install. Find valid versions at https://confluence.atlassian.com/crowd/crowd-4-0-release-notes-994320250.html (Crowd Software) or https://confluence.atlassian.com/x/XM2EO (Atlassian Enterprise Releases).
     Type: String
   JvmHeapOverride:
     Default: ''
@@ -581,7 +569,7 @@ Parameters:
       It cannot start or end with a hyphen (-).
     Type: String
   QSS3KeyPrefix:
-    Default: 'quickstart-atlassian-jira/'
+    Default: 'quickstart-atlassian-crowd/'
     AllowedPattern: ^[0-9a-zA-Z-/]*$
     ConstraintDescription: Quick Start key prefix can include numbers, lowercase letters,
       uppercase letters, hyphens (-), and forward slash (/).
@@ -930,21 +918,13 @@ Mappings:
     us-gov-east-1:
       HVM64: ami-a2d938d3
 
-  JIRAProduct2NameAndVersion:
-    Core:
-      name: jira-core
-      shortdisplayname: '"Jira Core"'
-      fulldisplayname: '"Atlassian Jira Core"'
-    ServiceDesk:
-      name: servicedesk
-      shortdisplayname: '"Jira SD"'
-      fulldisplayname: '"Atlassian Jira Service Desk"'
-    Software:
-      name: jira-software
-      shortdisplayname: '"Jira SW"'
-      fulldisplayname: '"Atlassian Jira Software"'
+  CROWDProduct2NameAndVersion:
+    CrowdNamingDetails:
+      name: crowd
+      shortdisplayname: '"Crowd"'
+      fulldisplayname: '"Atlassian Crowd Data Center"'
 Resources:
-  JiraClusterNodeRole:
+  ClusterNodeRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -959,7 +939,7 @@ Resources:
         - !Sub 'arn:${AWS::Partition}:iam::aws:policy/CloudWatchAgentServerPolicy'
       Path: /
       Policies:
-        - PolicyName: JiraClusterNodePolicy
+        - PolicyName: CrowdClusterNodePolicy
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -982,12 +962,12 @@ Resources:
                   - !Sub 'arn:${AWS::Partition}:route53:::change/*'
                   - !Sub 'arn:${AWS::Partition}:route53:::hostedzone/*'
                   - !Sub 'arn:${AWS::Partition}:route53:::delegationset/*'
-  JiraClusterNodeInstanceProfile:
+  ClusterNodeInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
       Path: /
-      Roles: [!Ref JiraClusterNodeRole]
-  # Jira node config
+      Roles: [!Ref ClusterNodeRole]
+  # Crowd node config
   ClusterNodeGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
@@ -996,24 +976,14 @@ Resources:
       MaxSize: !Ref ClusterNodeMax
       MinSize: !Ref ClusterNodeMin
       TargetGroupARNs: [!Ref MainTargetGroup]
-      VPCZoneIdentifier: !Split
-        - ","
-        - Fn::ImportValue: !Sub "${ExportPrefix}PriNets"
+      VPCZoneIdentifier: !Split [ ",", !ImportValue ATL-PriNets]
       Tags:
         - Key: Name
-          Value: !Sub ["${StackName} Jira Node", {StackName: !Ref 'AWS::StackName'}]
+          Value: !Sub ["${StackName} Crowd Node", {StackName: !Ref 'AWS::StackName'}]
           PropagateAtLaunch: true
         - Key: Cluster
           Value: !Ref AWS::StackName
           PropagateAtLaunch: true
-        # NOTE: The leading COMMIT/TIMESTAMP are used to locate the position to update; see scripts/update-tags.py
-        - Key: "atl:quickstart:commit-id"
-          Value: "COMMIT: f4f6f23a003db564a2347d9fae9924edd95dbfa5"
-          PropagateAtLaunch: true
-        - Key: "atl:quickstart:timestamp"
-          Value: "TIMESTAMP: 2020-03-09T00:26:04Z"
-          PropagateAtLaunch: true
-
   ClusterNodeLaunchConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
     DependsOn:
@@ -1031,13 +1001,13 @@ Resources:
               content:
                 'Fn::Join':
                   - "\n"
-                  - - "ATL_PRODUCT_FAMILY=jira"
+                  - - "ATL_PRODUCT_FAMILY=crowd"
                     - "ATL_DB_DRIVER=org.postgresql.Driver"
-                    - "ATL_JDBC_DB_NAME=jira"
-                    - "ATL_JDBC_USER=atljira"
+                    - "ATL_JDBC_DB_NAME=crowd"
+                    - "ATL_JDBC_USER=atlcrowd"
                     - "ATL_JVM_OPTS='-XX:+ExplicitGCInvokesConcurrent -XX:ReservedCodeCacheSize=512M'"
                     - "ATL_APP_DATA_MOUNT_ENABLED=false"
-                    - "ATL_ENABLED_PRODUCTS=Jira"
+                    - "ATL_ENABLED_PRODUCTS=Crowd"
                     - "ATL_ENABLED_SHARED_HOMES="
                     - "ATL_NGINX_ENABLED=false"
                     - "ATL_POSTGRES_ENABLED=false"
@@ -1045,9 +1015,8 @@ Resources:
                     - "ATL_RELEASE_S3_PATH=releases"
                     - "ATL_SSL_SELF_CERT_ENABLED=false"
                     - ""
-                    - !Sub ["ATL_PRODUCT_EDITION=${Edition}", Edition: !Ref "JiraProduct"]
-                    - !Sub ["ATL_PRODUCT_VERSION=${ProductVersion}", ProductVersion: !Ref JiraVersion]
-                    - !Sub ["ATL_EFS_ID=${ElasticFileSystem}", ElasticFileSystem: !Ref "ElasticFileSystem"]
+                    - !Sub ["ATL_PRODUCT_VERSION=${ProductVersion}", ProductVersion: !Ref CrowdVersion]
+                    - !Sub ["ATL_EFS_ID=${ElasticFileSystem}", ElasticFileSystem: !Ref ElasticFileSystem]
                     - !If [DoSSL, "ATL_SSL_PROXY=true", !Ref "AWS::NoValue"]
                     - !Sub ["ATL_AWS_STACK_NAME=${StackName}", StackName: !Ref "AWS::StackName"]
                     - !Sub ["ATL_CATALINA_OPTS=\"${CatalinaOpts} ${MailOpts}\"", { CatalinaOpts: !Ref CatalinaOpts, MailOpts: !If [DisableMail, '-Datlassian.mail.senddisabled=true -Datlassian.mail.fetchdisabled=true -Datlassian.mail.popdisabled=true', ''] }]
@@ -1068,10 +1037,10 @@ Resources:
                     - !Sub ["ATL_DB_TIMEBETWEENEVICTIONRUNSMILLIS=${DBTimeBetweenEvictionRunsMillis}", DBTimeBetweenEvictionRunsMillis: !Ref DBTimeBetweenEvictionRunsMillis]
                     - !Sub ["ATL_HOSTEDZONE=${HostedZone}", HostedZone: !Ref HostedZone]
                     - !Sub ["ATL_JDBC_PASSWORD='${DBPassword}'", DBPassword: !Ref DBPassword]
-                    - !Sub ["ATL_JDBC_URL=jdbc:postgresql://${DBEndpointAddress}:${DBEndpointPort}/jira?targetServerType=master", { DBEndpointAddress: !GetAtt DB.Outputs.RDSEndPointAddress, DBEndpointPort: !GetAtt DB.Outputs.RDSEndPointPort }]
-                    - !Sub ["ATL_JIRA_FULL_DISPLAY_NAME=${JiraFullDisplayName}", JiraFullDisplayName: !FindInMap [ "JIRAProduct2NameAndVersion", !Ref JiraProduct, "fulldisplayname"]]
-                    - !Sub ["ATL_JIRA_NAME=${JiraProductName}", JiraProductName: !FindInMap [ "JIRAProduct2NameAndVersion", !Ref JiraProduct, "name"]]
-                    - !Sub ["ATL_JIRA_SHORT_DISPLAY_NAME=${JiraShortDisplayName}", JiraShortDisplayName: !FindInMap [ "JIRAProduct2NameAndVersion", !Ref JiraProduct, "shortdisplayname"]]
+                    - !Sub ["ATL_JDBC_URL=jdbc:postgresql://${DBEndpointAddress}:${DBEndpointPort}/crowd?targetServerType=master", { DBEndpointAddress: !GetAtt DB.Outputs.RDSEndPointAddress, DBEndpointPort: !GetAtt DB.Outputs.RDSEndPointPort }]
+                    - !Sub ["ATL_CROWD_FULL_DISPLAY_NAME=${CrowdFullDisplayName}", CrowdFullDisplayName: !FindInMap [ "CROWDProduct2NameAndVersion", "CrowdNamingDetails", "fulldisplayname"]]
+                    - !Sub ["ATL_CROWD_NAME=${CrowdProductName}", CrowdProductName: !FindInMap [ "CROWDProduct2NameAndVersion", "CrowdNamingDetails", "name"]]
+                    - !Sub ["ATL_CROWD_SHORT_DISPLAY_NAME=${CrowdShortDisplayName}", CrowdShortDisplayName: !FindInMap [ "CROWDProduct2NameAndVersion", "CrowdNamingDetails", "shortdisplayname"]]
                     - !Sub ["ATL_JVM_HEAP=${AtlJvmHeap}", AtlJvmHeap: !If [OverrideHeap, !Ref 'JvmHeapOverride', !FindInMap [AWSInstanceType2Arch, !Ref ClusterNodeInstanceType, Jvmheap]]]
                     - !Sub ["ATL_PROXY_NAME=${AtlProxyName}", AtlProxyName: !If [UseCustomDnsName, !Ref CustomDnsName, !If [UseHostedZone, !Ref LoadBalancerCname, !GetAtt LoadBalancer.DNSName]]]
                     - !Sub ["ATL_TOMCAT_ACCEPTCOUNT=${TomcatAcceptCount}", TomcatAcceptCount: !Ref TomcatAcceptCount]
@@ -1086,11 +1055,11 @@ Resources:
                     - !Sub ["ATL_TOMCAT_REDIRECTPORT=${TomcatRedirectPort}", TomcatRedirectPort: !Ref TomcatRedirectPort]
                     - !Sub ["ATL_TOMCAT_SCHEME=${TomcatScheme}", TomcatScheme: !If [DoSSL, https, http]]
                     - !Sub ["ATL_TOMCAT_SECURE=${TomcatSecure}", TomcatSecure: !If [DoSSL, true, false]]
-                    - !Sub ["ATL_DEPLOYMENT_REPOSITORY=${DeployRepository}", DeployRepository: !Ref "DeploymentAutomationRepository"]
-                    - !Sub ["ATL_DEPLOYMENT_REPOSITORY_BRANCH=${DeployRepositoryBranch}", DeployRepositoryBranch: !Ref "DeploymentAutomationBranch"]
-                    - !Sub ["ATL_DEPLOYMENT_REPOSITORY_PLAYBOOK=${DeployRepositoryPlaybook}", DeployRepositoryPlaybook: !Ref "DeploymentAutomationPlaybook"]
-                    - !Sub ["ATL_DEPLOYMENT_REPOSITORY_KEYNAME=${DeployRepositoryKeyName}", DeployRepositoryKeyName: !Ref "DeploymentAutomationKeyName"]
-                    - !Sub ["ATL_DEPLOYMENT_REPOSITORY_CUSTOM_PARAMS='${DeployRepositoryCustomParams}'", DeployRepositoryCustomParams: !Ref "DeploymentAutomationCustomParams"]
+                    - !Sub ["ATL_DEPLOYMENT_REPOSITORY=${DeployRepository}", DeployRepository: !Ref DeploymentAutomationRepository]
+                    - !Sub ["ATL_DEPLOYMENT_REPOSITORY_BRANCH=${DeployRepositoryBranch}", DeployRepositoryBranch: !Ref DeploymentAutomationBranch]
+                    - !Sub ["ATL_DEPLOYMENT_REPOSITORY_PLAYBOOK=${DeployRepositoryPlaybook}", DeployRepositoryPlaybook: !Ref DeploymentAutomationPlaybook]
+                    - !Sub ["ATL_DEPLOYMENT_REPOSITORY_KEYNAME=${DeployRepositoryKeyName}", DeployRepositoryKeyName: !Ref DeploymentAutomationKeyName]
+                    - !Sub ["ATL_DEPLOYMENT_REPOSITORY_CUSTOM_PARAMS='${DeployRepositoryCustomParams}'", DeployRepositoryCustomParams: !Ref DeploymentAutomationCustomParams]
 
                     - !Sub ["ATL_AWS_ENABLE_CLOUDWATCH=${EnableCW}", EnableCW: !If [EnableCloudWatch, true, false]]
                     - !Sub ["ATL_AWS_ENABLE_CLOUDWATCH_LOGS=${EnableCWLogs}", EnableCWLogs: !If [EnableCloudWatchLogs, true, false]]
@@ -1143,19 +1112,16 @@ Resources:
             VolumeSize: !Ref ClusterNodeVolumeSize
         - DeviceName: /dev/xvdf
           NoDevice: true
-      KeyName: !If
-        - KeyProvided
-        - !Ref KeyPairName
-        - Fn::ImportValue: !Sub "${ExportPrefix}DefaultKey"
-      IamInstanceProfile: !Ref JiraClusterNodeInstanceProfile
+      KeyName: !If [ KeyProvided, !Ref KeyPairName, !ImportValue ATL-DefaultKey ]
+      IamInstanceProfile: !Ref ClusterNodeInstanceProfile
       ImageId:
         !FindInMap
-          - AWSRegionArch2AMI
-          - !Ref AWS::Region
-          - !FindInMap
-              - AWSInstanceType2Arch
-              - !Ref ClusterNodeInstanceType
-              - Arch
+        - AWSRegionArch2AMI
+        - !Ref AWS::Region
+        - !FindInMap
+          - AWSInstanceType2Arch
+          - !Ref ClusterNodeInstanceType
+          - Arch
       InstanceType: !Ref ClusterNodeInstanceType
       SecurityGroups: [!Ref SecurityGroup]
       UserData:
@@ -1169,6 +1135,53 @@ Resources:
             - !Sub [" --resource ClusterNodeLaunchConfig --region ${Region}\n", {Region: !Ref "AWS::Region"}]
             - !Sub ["/opt/aws/bin/cfn-signal -e $? --stack ${StackName}", {StackName: !Ref "AWS::StackName"}]
             - !Sub [" --resource ClusterNodeLaunchConfig --region ${Region}", {Region: !Ref "AWS::Region"}]
+  #Scaling policies to respond during resource usage spikes
+  ClusterNodeScaleUpPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref ClusterNodeGroup
+      Cooldown: '600'
+      ScalingAdjustment: 1
+  ClusterNodeScaleDownPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref ClusterNodeGroup
+      Cooldown: '600'
+      ScalingAdjustment: -1
+  #Scaling policy alarms
+  CPUAlarmHigh:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Scale up if CPU > 60% for 5 minutes
+      MetricName: CPUUtilization
+      Namespace: AWS/EC2
+      Statistic: Average
+      Period: 60
+      EvaluationPeriods: 5
+      Threshold: 60
+      AlarmActions: [!Ref ClusterNodeScaleUpPolicy]
+      Dimensions:
+        - Name: AutoScalingGroupName
+          Value: !Ref ClusterNodeGroup
+      ComparisonOperator: GreaterThanThreshold
+  CPUAlarmLow:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Scale down if CPU < 40% for 30 minutes
+      MetricName: CPUUtilization
+      Namespace: AWS/EC2
+      Statistic: Average
+      Period: 60
+      EvaluationPeriods: 30
+      Threshold: 40
+      AlarmActions: [!Ref ClusterNodeScaleDownPolicy]
+      Dimensions:
+        - Name: AutoScalingGroupName
+          Value: !Ref ClusterNodeGroup
+      ComparisonOperator: LessThanThreshold
+  # Elastic file system
   ElasticFileSystem:
     Type: AWS::EFS::FileSystem
     Properties:
@@ -1177,31 +1190,18 @@ Resources:
           Value: !Join [' ', [!Ref 'AWS::StackName', 'cluster shared-files']]
         - Key: Application
           Value: !Ref AWS::StackId
-        # NOTE: The leading COMMIT/TIMESTAMP are used to locate the position to update; see scripts/update-tags.py
-        - Key: "atl:quickstart:commit-id"
-          Value: "COMMIT: f4f6f23a003db564a2347d9fae9924edd95dbfa5"
-        - Key: "atl:quickstart:timestamp"
-          Value: "TIMESTAMP: 2020-03-09T00:26:04Z"
   EFSMountAz1:
     Type: AWS::EFS::MountTarget
     Properties:
       FileSystemId: !Ref ElasticFileSystem
       SecurityGroups: [!Ref SecurityGroup]
-      SubnetId: !Select
-      - 0
-      - !Split
-           - ","
-           - Fn::ImportValue: !Sub "${ExportPrefix}PriNets"
+      SubnetId: !Select [0, !Split [ ",", !ImportValue ATL-PriNets]]
   EFSMountAz2:
     Type: AWS::EFS::MountTarget
     Properties:
       FileSystemId: !Ref ElasticFileSystem
       SecurityGroups: [!Ref SecurityGroup]
-      SubnetId: !Select
-        - 1
-        - !Split
-          - ","
-          - Fn::ImportValue: !Sub "${ExportPrefix}PriNets"
+      SubnetId: !Select [1, !Split [ ",", !ImportValue ATL-PriNets]]
   EFSCname:
     Type: AWS::Route53::RecordSet
     Condition: UseHostedZone
@@ -1232,7 +1232,6 @@ Resources:
         DBAllocatedStorage: !Ref DBStorage
         DBStorageEncrypted: !Ref DBStorageEncrypted
         DBStorageType: !Ref DBStorageType
-        ExportPrefix: !Ref ExportPrefix
         QSS3BucketName: !Ref QSS3BucketName
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
   DBCname:
@@ -1246,7 +1245,6 @@ Resources:
       TTL: '900'
       ResourceRecords:
         - !GetAtt DB.Outputs.RDSEndPointAddress
-
   # Loadbalancer
   LoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
@@ -1256,20 +1254,12 @@ Resources:
           Value: '3600'
       Scheme: !If [UsePublicIp, 'internet-facing', 'internal']
       SecurityGroups: [!Ref SecurityGroup]
-      Subnets: !Split
-        - ","
-        - Fn::ImportValue: !Sub "${ExportPrefix}PubNets"
+      Subnets: !Split [ ",", !ImportValue ATL-PubNets]
       Tags:
         - Key: Name
           Value: !Sub ["${StackName}-LoadBalancer", StackName: !Ref 'AWS::StackName']
         - Key: Cluster
           Value: !Ref AWS::StackName
-        # NOTE: The leading COMMIT/TIMESTAMP are used to locate the position to update; see scripts/update-tags.py
-        - Key: "atl:quickstart:commit-id"
-          Value: "COMMIT: f4f6f23a003db564a2347d9fae9924edd95dbfa5"
-        - Key: "atl:quickstart:timestamp"
-          Value: "TIMESTAMP: 2020-03-09T00:26:04Z"
-
   LoadBalancerHTTPListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
@@ -1306,8 +1296,7 @@ Resources:
     Properties:
       Port: !Ref TomcatDefaultConnectorPort
       Protocol: HTTP
-      VpcId:
-        Fn::ImportValue: !Sub "${ExportPrefix}VPCID"
+      VpcId: !ImportValue ATL-VPCID
       HealthCheckIntervalSeconds: 20
       HealthCheckTimeoutSeconds: 10
       HealthyThresholdCount: 2
@@ -1328,11 +1317,6 @@ Resources:
           Value: MainTargetGroup
         - Key: Cluster
           Value: !Ref AWS::StackName
-        # NOTE: The leading COMMIT/TIMESTAMP are used to locate the position to update; see scripts/update-tags.py
-        - Key: "atl:quickstart:commit-id"
-          Value: "COMMIT: f4f6f23a003db564a2347d9fae9924edd95dbfa5"
-        - Key: "atl:quickstart:timestamp"
-          Value: "TIMESTAMP: 2020-03-09T00:26:04Z"
     DependsOn:
       - LoadBalancer
   LoadBalancerCname:
@@ -1363,48 +1347,10 @@ Resources:
           FromPort: 443
           ToPort: 443
           CidrIp: !Ref CidrBlock
-        - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
-          CidrIp:
-            !Sub
-              - "${NAT1IP}/32"
-              - NAT1IP:
-                  Fn::ImportValue: !Sub '${ExportPrefix}NAT1EIP'
-        - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
-          CidrIp:
-            !Sub
-            - "${NAT2IP}/32"
-            - NAT2IP:
-                Fn::ImportValue: !Sub '${ExportPrefix}NAT2EIP'
-        - IpProtocol: tcp
-          FromPort: 443
-          ToPort: 443
-          CidrIp:
-            !Sub
-            - "${NAT1IP}/32"
-            - NAT1IP:
-                Fn::ImportValue: !Sub '${ExportPrefix}NAT1EIP'
-        - IpProtocol: tcp
-          FromPort: 443
-          ToPort: 443
-          CidrIp:
-            !Sub
-            - "${NAT2IP}/32"
-            - NAT2IP:
-                Fn::ImportValue: !Sub '${ExportPrefix}NAT2EIP'
       Tags:
         - Key: Name
           Value: !Join [' ', [!Ref "AWS::StackName", 'sg']]
-        # NOTE: The leading COMMIT/TIMESTAMP are used to locate the position to update; see scripts/update-tags.py
-        - Key: "atl:quickstart:commit-id"
-          Value: "COMMIT: f4f6f23a003db564a2347d9fae9924edd95dbfa5"
-        - Key: "atl:quickstart:timestamp"
-          Value: "TIMESTAMP: 2020-03-09T00:26:04Z"
-      VpcId:
-        Fn::ImportValue: !Sub "${ExportPrefix}VPCID"
+      VpcId: !ImportValue ATL-VPCID
   SecurityGroupIngress:
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
@@ -1432,11 +1378,6 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ["${StackName} Encryption Key", {StackName: !Ref 'AWS::StackName'}]
-        # NOTE: The leading COMMIT/TIMESTAMP are used to locate the position to update; see scripts/update-tags.py
-        - Key: "atl:quickstart:commit-id"
-          Value: "COMMIT: f4f6f23a003db564a2347d9fae9924edd95dbfa5"
-        - Key: "atl:quickstart:timestamp"
-          Value: "TIMESTAMP: 2020-03-09T00:26:04Z"
   EncryptionKeyAlias:
     Condition: UseDatabaseEncryption
     Type: AWS::KMS::Alias
@@ -1456,7 +1397,7 @@ Resources:
         - QSS3Region: !If ["GovCloudCondition", "s3-us-gov-west-1", "s3"]
       Parameters:
         ProductStackName: !Sub "${AWS::StackName}"
-        ProductFamilyName: !FindInMap [ "JIRAProduct2NameAndVersion", !Ref JiraProduct, "name"]
+        ProductFamilyName: !FindInMap [ "CROWDProduct2NameAndVersion", "CrowdNamingDetails", "name"]
         AsgToMonitor: !Ref ClusterNodeGroup
 
 Outputs:

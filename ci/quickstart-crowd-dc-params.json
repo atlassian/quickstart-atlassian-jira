@@ -25,7 +25,7 @@
     },
     {
         "ParameterKey": "CustomDnsName",
-        "ParameterValue": "qsjiraci.awsqs.com"
+        "ParameterValue": "qscrowdci.awsqs.com"
     },
     {
         "ParameterKey":"QSS3BucketName",
@@ -33,7 +33,7 @@
     },
     {
         "ParameterKey":"QSS3KeyPrefix",
-        "ParameterValue":"quickstart-atlassian-jira/"
+        "ParameterValue":"quickstart-atlassian-crowd/"
     },
     {
         "ParameterKey":"AccessCIDR",

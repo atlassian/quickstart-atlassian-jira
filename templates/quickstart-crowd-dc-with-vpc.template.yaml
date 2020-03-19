@@ -3,16 +3,16 @@
 # As a rule, we should work to minimize our diffs between these files as best we can, so that future changes are easy to make across all supported CloudFormation templates.
 # Using YAML as our file format will allow us to put a block comment at the top of the file saying exactly this.
 AWSTemplateFormatVersion: 2010-09-09
-Description: Atlassian Jira Data Center with VPC
+Description: Atlassian Crowd Data Center with VPC
 
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
-          default: Jira setup
+          default: Crowd setup
         Parameters:
-          - JiraProduct
-          - JiraVersion
+          - CrowdProduct
+          - CrowdVersion
       - Label:
           default: Cluster nodes
         Parameters:
@@ -59,29 +59,29 @@ Metadata:
       - Label:
           default: Application Tuning (Optional)
         Parameters:
-            - TomcatContextPath
-            - CatalinaOpts
-            - JvmHeapOverride
-            - DBPoolMaxSize
-            - DBPoolMinSize
-            - DBMaxIdle
-            - DBMaxWaitMillis
-            - DBMinEvictableIdleTimeMillis
-            - DBMinIdle
-            - DBRemoveAbandoned
-            - DBRemoveAbandonedTimeout
-            - DBTestOnBorrow
-            - DBTestWhileIdle
-            - DBTimeBetweenEvictionRunsMillis
-            - MailEnabled
-            - TomcatAcceptCount
-            - TomcatConnectionTimeout
-            - TomcatDefaultConnectorPort
-            - TomcatEnableLookups
-            - TomcatMaxThreads
-            - TomcatMinSpareThreads
-            - TomcatProtocol
-            - TomcatRedirectPort
+          - TomcatContextPath
+          - CatalinaOpts
+          - JvmHeapOverride
+          - DBPoolMaxSize
+          - DBPoolMinSize
+          - DBMaxIdle
+          - DBMaxWaitMillis
+          - DBMinEvictableIdleTimeMillis
+          - DBMinIdle
+          - DBRemoveAbandoned
+          - DBRemoveAbandonedTimeout
+          - DBTestOnBorrow
+          - DBTestWhileIdle
+          - DBTimeBetweenEvictionRunsMillis
+          - MailEnabled
+          - TomcatAcceptCount
+          - TomcatConnectionTimeout
+          - TomcatDefaultConnectorPort
+          - TomcatEnableLookups
+          - TomcatMaxThreads
+          - TomcatMinSpareThreads
+          - TomcatProtocol
+          - TomcatRedirectPort
       - Label:
           default: AWS Quick Start Configuration
         Parameters:
@@ -164,9 +164,9 @@ Metadata:
         default: Route 53 Hosted Zone
       InternetFacingLoadBalancer:
         default: Make instance internet facing
-      JiraProduct:
-        default: Jira Product *
-      JiraVersion:
+      CrowdProduct:
+        default: Crowd Product *
+      CrowdVersion:
         default: Version *
       JvmHeapOverride:
         default: JVM Heap Size Override
@@ -212,7 +212,7 @@ Metadata:
         default: IP address block for the VPC
 
 Parameters:
-  # Jira DC template parameters
+  # Crowd DC template parameters
   CatalinaOpts:
     Default: ''
     Description: Pass in any additional jvm options to tune Catalina
@@ -224,7 +224,7 @@ Parameters:
     AllowedValues: ["Off", "Metrics Only", "Metrics and Logs"]
     ConstraintDescription: "Must be 'Off', 'Metrics Only', or 'Metrics and Logs'"
   ClusterNodeInstanceType:
-    Default: c5.xlarge
+    Default: t3.medium
     AllowedValues:
       - c4.large
       - c4.xlarge
@@ -344,7 +344,7 @@ Parameters:
     ConstraintDescription: Must be 'Amazon Aurora PostgreSQL' or 'PostgreSQL'.
     Type: String
   DBInstanceClass:
-    Default: db.m5.large
+    Default: db.t2.medium
     AllowedValues:
       - db.m5.large
       - db.m5.xlarge
@@ -404,7 +404,7 @@ Parameters:
     Type: String
   DBMaxWaitMillis:
     Default: 10000
-    Description: The length of time (in milliseconds) that Jira is allowed to wait for a database connection to become available (while there are no free ones available in the pool), before returning an error
+    Description: The length of time (in milliseconds) that Crowd is allowed to wait for a database connection to become available (while there are no free ones available in the pool), before returning an error
     Type: String
   DBMinEvictableIdleTimeMillis:
     Default: 180000
@@ -467,7 +467,7 @@ Parameters:
     Type: String
   DBTestOnBorrow:
     Default: false
-    Description: Tests if the database connection is valid when it is borrowed from the database connection pool by Jira
+    Description: Tests if the database connection is valid when it is borrowed from the database connection pool by Crowd
     Type: String
   DBTestWhileIdle:
     Default: true
@@ -486,9 +486,9 @@ Parameters:
     Type: String
     Description: The deployment automation repository branch to pull from.
   DeploymentAutomationPlaybook:
-    Default: "aws_jira_dc_node.yml"
+    Default: "aws_crowd_dc_node.yml"
     Type: String
-    Description: The Ansible playbook to invoke to initialise the Jira node on first start.
+    Description: The Ansible playbook to invoke to initialise the Crowd node on first start.
   DeploymentAutomationCustomParams:
     Default: ""
     Type: String
@@ -507,20 +507,17 @@ Parameters:
     ConstraintDescription: Must be the name of an existing Route53 Hosted Zone.
     Description: The domain name of the Route53 PRIVATE Hosted Zone in which to create cnames
     Type: String
-  JiraProduct:
+  CrowdProduct:
     Default: Software
-    Description: The Jira product to install.
+    Description: The Crowd product to install.
     Type: String
-    ConstraintDescription: 'Must be "Core", "Software", or "ServiceDesk".'
     AllowedValues:
-      - Core
       - Software
-      - ServiceDesk
-  JiraVersion:
-    Default: 8.5.3
+  CrowdVersion:
+    Default: 4.0.0
     AllowedPattern: '(\d+\.\d+\.\d+(-?.*))|(latest)'
-    ConstraintDescription: Must be a valid version number or 'latest'; for example, 8.1.0 for Jira Software, or 4.1.0 for ServiceDesk.
-    Description: The version of Jira Software or Jira Service Desk to install. Find valid versions at https://confluence.atlassian.com/x/TVlNLg (Jira Software), https://confluence.atlassian.com/x/jh9-Lg (Jira Service Desk), or https://confluence.atlassian.com/x/XM2EO (Atlassian Enterprise Releases).
+    ConstraintDescription: Must be a valid version number or 'latest'; for example, 4.0.0 for Crowd Software.
+    Description: The version of Crowd Software to install. Find valid versions at https://confluence.atlassian.com/crowd/crowd-4-0-release-notes-994320250.html (Crowd Software) or https://confluence.atlassian.com/x/XM2EO (Atlassian Enterprise Releases).
     Type: String
   JvmHeapOverride:
     Default: ''
@@ -629,7 +626,7 @@ Parameters:
       It cannot start or end with a hyphen (-).
     Type: String
   QSS3KeyPrefix:
-    Default: 'quickstart-atlassian-jira/'
+    Default: 'quickstart-atlassian-crowd/'
     AllowedPattern: ^[0-9a-zA-Z-/]*$
     ConstraintDescription: Quick Start key prefix can include numbers, lowercase letters,
       uppercase letters, hyphens (-), and forward slash (/).
@@ -672,12 +669,12 @@ Resources:
         PublicSubnet2CIDR: !Ref 'PublicSubnet2CIDR'
         VPCCIDR: !Ref 'VPCCIDR'
 
-  JiraDCStack:
+  CrowdDCStack:
     DependsOn: VPCStack
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub
-        - https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}templates/quickstart-jira-dc.template.yaml
+        - https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}templates/quickstart-crowd-dc.template.yaml
         - QSS3Region: !If ["GovCloudCondition", "s3-us-gov-west-1", "s3"]
       Parameters:
         CatalinaOpts: !Ref 'CatalinaOpts'
@@ -716,8 +713,8 @@ Resources:
         ExportPrefix: !Ref 'ExportPrefix'
         HostedZone: !Ref 'HostedZone'
         InternetFacingLoadBalancer: !Ref 'InternetFacingLoadBalancer'
-        JiraProduct: !Ref 'JiraProduct'
-        JiraVersion: !Ref 'JiraVersion'
+        CrowdProduct: !Ref 'CrowdProduct'
+        CrowdVersion: !Ref 'CrowdVersion'
         JvmHeapOverride: !Ref 'JvmHeapOverride'
         KeyPairName: !Ref 'KeyPairName'
         MailEnabled: !Ref 'MailEnabled'
@@ -737,23 +734,23 @@ Resources:
 Outputs:
   ServiceURL:
     Description: The URL to access this Atlassian service
-    Value: !GetAtt 'JiraDCStack.Outputs.ServiceURL'
+    Value: !GetAtt 'CrowdDCStack.Outputs.ServiceURL'
   LoadBalancerURL:
     Description: The Load Balancer URL
-    Value: !GetAtt 'JiraDCStack.Outputs.LoadBalancerURL'
+    Value: !GetAtt 'CrowdDCStack.Outputs.LoadBalancerURL'
   BastionIP:
     Description: Bastion node IP (use as a jumpbox to connect to the nodes)
     Value: !GetAtt 'VPCStack.Outputs.BastionPubIp'
   SGname:
     Description: The name of the SecurityGroup
-    Value: !GetAtt 'JiraDCStack.Outputs.SGname'
+    Value: !GetAtt 'CrowdDCStack.Outputs.SGname'
   DBEndpointAddress:
     Description: The Database Connection String
-    Value: !GetAtt 'JiraDCStack.Outputs.DBEndpointAddress'
+    Value: !GetAtt 'CrowdDCStack.Outputs.DBEndpointAddress'
   DBEncryptionKey:
     Condition: UseDatabaseEncryption
     Description: The alias of the encryption key created for RDS
-    Value: !GetAtt 'JiraDCStack.Outputs.DBEncryptionKey'
+    Value: !GetAtt 'CrowdDCStack.Outputs.DBEncryptionKey'
   EFSCname:
     Description: The cname of the EFS
-    Value: !GetAtt 'JiraDCStack.Outputs.EFSCname'
+    Value: !GetAtt 'CrowdDCStack.Outputs.EFSCname'

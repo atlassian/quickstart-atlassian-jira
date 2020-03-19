@@ -1,12 +1,11 @@
-# quickstart-atlassian-jira
-## Jira Software and Jira Service Desk Data Center on the AWS Cloud
+# quickstart-atlassian-crowd
+## Crowd Software Data Center on the AWS Cloud
 
-Use this Quick Start to deploy one of the following Jira products from Atlassian on the AWS Cloud:
+Use this Quick Start to deploy Crowd Data Center on the AWS Cloud.
 
-* Jira Software Data Center
-* Jira Service Desk Data Center
+Crowd lets you centralize identity management. Manage users from multiple directories - Active Directory, LDAP, OpenLDAP or Microsoft Azure AD - and control application authentication permissions in one single location.
 
-This Quick Start uses the [Atlassian Standard Infrastructure (ASI)](https://fwd.aws/xYyYy) as a foundation. You can choose to build a new ASI for your deployment or deploy Jira into your existing ASI. You can also deploy Bitbucket Data Center and Confluence Data Center within the same ASI.
+This Quick Start uses the [Atlassian Standard Infrastructure (ASI)](https://fwd.aws/xYyYy) as a foundation. You can choose to build a new ASI for your deployment or deploy Crowd into your existing ASI. You can also deploy Bitbucket Data Center and Confluence Data Center within the same ASI.
 
 ![Quick Start architecture for Jira on AWS](https://d1.awsstatic.com/partner-network/QuickStart/datasheets/jira-arch-on-aws.9d422797475ea5bd5d38f009ca8c540736f5449e.png)
 
@@ -16,7 +15,7 @@ For architectural details, best practices, step-by-step instructions, and custom
 ### Network prerequisites
 
 You need to create the required AWS networking infrastructure
-(VPC, subnets) by using the [ASI Quick Start](https://fwd.aws/xYyYy), or by deploying Jira with a new ASI.
+(VPC, subnets) by using the [ASI Quick Start](https://fwd.aws/xYyYy), or by deploying Crowd with a new ASI.
 For details, see the [deployment guide](https://fwd.aws/Wz3Qb).
 
 ### Contributing & issues
