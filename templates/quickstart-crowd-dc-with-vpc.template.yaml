@@ -11,7 +11,6 @@ Metadata:
       - Label:
           default: Crowd setup
         Parameters:
-          - CrowdProduct
           - CrowdVersion
       - Label:
           default: Cluster nodes
@@ -164,8 +163,6 @@ Metadata:
         default: Route 53 Hosted Zone
       InternetFacingLoadBalancer:
         default: Make instance internet facing
-      CrowdProduct:
-        default: Crowd Product *
       CrowdVersion:
         default: Version *
       JvmHeapOverride:
@@ -224,7 +221,7 @@ Parameters:
     AllowedValues: ["Off", "Metrics Only", "Metrics and Logs"]
     ConstraintDescription: "Must be 'Off', 'Metrics Only', or 'Metrics and Logs'"
   ClusterNodeInstanceType:
-    Default: t3.medium
+    Default: c5.xlarge
     AllowedValues:
       - c4.large
       - c4.xlarge
@@ -344,7 +341,7 @@ Parameters:
     ConstraintDescription: Must be 'Amazon Aurora PostgreSQL' or 'PostgreSQL'.
     Type: String
   DBInstanceClass:
-    Default: db.t2.medium
+    Default: db.m4.large
     AllowedValues:
       - db.m5.large
       - db.m5.xlarge
@@ -507,12 +504,6 @@ Parameters:
     ConstraintDescription: Must be the name of an existing Route53 Hosted Zone.
     Description: The domain name of the Route53 PRIVATE Hosted Zone in which to create cnames
     Type: String
-  CrowdProduct:
-    Default: Software
-    Description: The Crowd product to install.
-    Type: String
-    AllowedValues:
-      - Software
   CrowdVersion:
     Default: 4.0.0
     AllowedPattern: '(\d+\.\d+\.\d+(-?.*))|(latest)'
@@ -713,7 +704,6 @@ Resources:
         ExportPrefix: !Ref 'ExportPrefix'
         HostedZone: !Ref 'HostedZone'
         InternetFacingLoadBalancer: !Ref 'InternetFacingLoadBalancer'
-        CrowdProduct: !Ref 'CrowdProduct'
         CrowdVersion: !Ref 'CrowdVersion'
         JvmHeapOverride: !Ref 'JvmHeapOverride'
         KeyPairName: !Ref 'KeyPairName'

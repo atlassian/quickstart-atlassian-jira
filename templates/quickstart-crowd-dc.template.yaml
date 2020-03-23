@@ -203,7 +203,7 @@ Parameters:
     AllowedValues: ["Off", "Metrics Only", "Metrics and Logs"]
     ConstraintDescription: "Must be 'Off', 'Metrics Only', or 'Metrics and Logs'"
   ClusterNodeInstanceType:
-    Default: t3.medium
+    Default: c5.xlarge
     AllowedValues:
       - c4.large
       - c4.xlarge
@@ -323,7 +323,7 @@ Parameters:
     ConstraintDescription: Must be 'Amazon Aurora PostgreSQL' or 'PostgreSQL'.
     Type: String
   DBInstanceClass:
-    Default: db.t2.medium
+    Default: db.m4.large
     AllowedValues:
       - db.m5.large
       - db.m5.xlarge
@@ -976,7 +976,7 @@ Resources:
       MaxSize: !Ref ClusterNodeMax
       MinSize: !Ref ClusterNodeMin
       TargetGroupARNs: [!Ref MainTargetGroup]
-      VPCZoneIdentifier: !Split [ ",", !ImportValue ATL-PriNets]
+      VPCZoneIdentifier: !Split [ ",", !ImportValue "${ExportPrefix}PriNets"]
       Tags:
         - Key: Name
           Value: !Sub ["${StackName} Crowd Node", {StackName: !Ref 'AWS::StackName'}]
@@ -1112,7 +1112,7 @@ Resources:
             VolumeSize: !Ref ClusterNodeVolumeSize
         - DeviceName: /dev/xvdf
           NoDevice: true
-      KeyName: !If [ KeyProvided, !Ref KeyPairName, !ImportValue ATL-DefaultKey ]
+      KeyName: !If [ KeyProvided, !Ref KeyPairName, !ImportValue "${ExportPrefix}DefaultKey" ]
       IamInstanceProfile: !Ref ClusterNodeInstanceProfile
       ImageId:
         !FindInMap
@@ -1195,13 +1195,13 @@ Resources:
     Properties:
       FileSystemId: !Ref ElasticFileSystem
       SecurityGroups: [!Ref SecurityGroup]
-      SubnetId: !Select [0, !Split [ ",", !ImportValue ATL-PriNets]]
+      SubnetId: !Select [0, !Split [ ",", !ImportValue "${ExportPrefix}PriNets"]]
   EFSMountAz2:
     Type: AWS::EFS::MountTarget
     Properties:
       FileSystemId: !Ref ElasticFileSystem
       SecurityGroups: [!Ref SecurityGroup]
-      SubnetId: !Select [1, !Split [ ",", !ImportValue ATL-PriNets]]
+      SubnetId: !Select [1, !Split [ ",", !ImportValue "${ExportPrefix}PriNets"]]
   EFSCname:
     Type: AWS::Route53::RecordSet
     Condition: UseHostedZone
@@ -1254,7 +1254,7 @@ Resources:
           Value: '3600'
       Scheme: !If [UsePublicIp, 'internet-facing', 'internal']
       SecurityGroups: [!Ref SecurityGroup]
-      Subnets: !Split [ ",", !ImportValue ATL-PubNets]
+      Subnets: !Split [ ",", !ImportValue "${ExportPrefix}PubNets"]
       Tags:
         - Key: Name
           Value: !Sub ["${StackName}-LoadBalancer", StackName: !Ref 'AWS::StackName']
@@ -1296,7 +1296,7 @@ Resources:
     Properties:
       Port: !Ref TomcatDefaultConnectorPort
       Protocol: HTTP
-      VpcId: !ImportValue ATL-VPCID
+      VpcId: !ImportValue "${ExportPrefix}VPCID"
       HealthCheckIntervalSeconds: 20
       HealthCheckTimeoutSeconds: 10
       HealthyThresholdCount: 2
@@ -1350,7 +1350,7 @@ Resources:
       Tags:
         - Key: Name
           Value: !Join [' ', [!Ref "AWS::StackName", 'sg']]
-      VpcId: !ImportValue ATL-VPCID
+      VpcId: !ImportValue "${ExportPrefix}VPCID"
   SecurityGroupIngress:
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
