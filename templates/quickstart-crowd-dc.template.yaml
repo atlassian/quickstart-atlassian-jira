@@ -903,11 +903,6 @@ Mappings:
     us-gov-east-1:
       HVM64: ami-a2d938d3
 
-  CROWDProduct2NameAndVersion:
-    CrowdNamingDetails:
-      name: crowd
-      shortdisplayname: '"Crowd"'
-      fulldisplayname: '"Atlassian Crowd Data Center"'
 Resources:
   ClusterNodeRole:
     Type: AWS::IAM::Role
@@ -1001,6 +996,9 @@ Resources:
                     - "ATL_RELEASE_S3_BUCKET=atlassian-software"
                     - "ATL_RELEASE_S3_PATH=releases"
                     - "ATL_SSL_SELF_CERT_ENABLED=false"
+                    - "ATL_CROWD_FULL_DISPLAY_NAME=Atlassian Crowd Data Center"
+                    - "ATL_CROWD_NAME=crowd"
+                    - "ATL_CROWD_SHORT_DISPLAY_NAME=Crowd"
                     - ""
                     - !Sub ["ATL_PRODUCT_VERSION=${ProductVersion}", ProductVersion: !Ref CrowdVersion]
                     - !Sub ["ATL_EFS_ID=${ElasticFileSystem}", ElasticFileSystem: !Ref ElasticFileSystem]
@@ -1024,9 +1022,6 @@ Resources:
                     - !Sub ["ATL_HOSTEDZONE=${HostedZone}", HostedZone: !Ref HostedZone]
                     - !Sub ["ATL_JDBC_PASSWORD='${DBPassword}'", DBPassword: !Ref DBPassword]
                     - !Sub ["ATL_JDBC_URL=jdbc:postgresql://${DBEndpointAddress}:${DBEndpointPort}/crowd?targetServerType=master", { DBEndpointAddress: !GetAtt DB.Outputs.RDSEndPointAddress, DBEndpointPort: !GetAtt DB.Outputs.RDSEndPointPort }]
-                    - !Sub ["ATL_CROWD_FULL_DISPLAY_NAME=${CrowdFullDisplayName}", CrowdFullDisplayName: !FindInMap [ "CROWDProduct2NameAndVersion", "CrowdNamingDetails", "fulldisplayname"]]
-                    - !Sub ["ATL_CROWD_NAME=${CrowdProductName}", CrowdProductName: !FindInMap [ "CROWDProduct2NameAndVersion", "CrowdNamingDetails", "name"]]
-                    - !Sub ["ATL_CROWD_SHORT_DISPLAY_NAME=${CrowdShortDisplayName}", CrowdShortDisplayName: !FindInMap [ "CROWDProduct2NameAndVersion", "CrowdNamingDetails", "shortdisplayname"]]
                     - !Sub ["ATL_JVM_HEAP=${AtlJvmHeap}", AtlJvmHeap: !If [OverrideHeap, !Ref 'JvmHeapOverride', !FindInMap [AWSInstanceType2Arch, !Ref ClusterNodeInstanceType, Jvmheap]]]
                     - !Sub ["ATL_PROXY_NAME=${AtlProxyName}", AtlProxyName: !If [UseCustomDnsName, !Ref CustomDnsName, !If [UseHostedZone, !Ref LoadBalancerCname, !GetAtt LoadBalancer.DNSName]]]
                     - !Sub ["ATL_TOMCAT_ACCEPTCOUNT=${TomcatAcceptCount}", TomcatAcceptCount: !Ref TomcatAcceptCount]
@@ -1398,7 +1393,7 @@ Resources:
         - QSS3Region: !If ["GovCloudCondition", "s3-us-gov-west-1", "s3"]
       Parameters:
         ProductStackName: !Sub "${AWS::StackName}"
-        ProductFamilyName: !FindInMap [ "CROWDProduct2NameAndVersion", "CrowdNamingDetails", "name"]
+        ProductFamilyName: "crowd"
         AsgToMonitor: !Ref ClusterNodeGroup
 
 Outputs:
