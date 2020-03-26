@@ -996,9 +996,6 @@ Resources:
                     - "ATL_RELEASE_S3_BUCKET=atlassian-software"
                     - "ATL_RELEASE_S3_PATH=releases"
                     - "ATL_SSL_SELF_CERT_ENABLED=false"
-                    - "ATL_CROWD_FULL_DISPLAY_NAME=Atlassian Crowd Data Center"
-                    - "ATL_CROWD_NAME=crowd"
-                    - "ATL_CROWD_SHORT_DISPLAY_NAME=Crowd"
                     - ""
                     - !Sub ["ATL_PRODUCT_VERSION=${ProductVersion}", ProductVersion: !Ref CrowdVersion]
                     - !Sub ["ATL_EFS_ID=${ElasticFileSystem}", ElasticFileSystem: !Ref ElasticFileSystem]
