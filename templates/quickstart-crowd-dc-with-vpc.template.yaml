@@ -28,7 +28,6 @@ Metadata:
       - Label:
           default: Database
         Parameters:
-          - DBEngine
           - DBInstanceClass
           - DBIops
           - DBMasterUserPassword
@@ -107,8 +106,6 @@ Metadata:
         default: Cluster node instance volume size
       CustomDnsName:
         default: Existing DNS name
-      DBEngine:
-        default: The database engine to deploy with
       DBInstanceClass:
         default: Database instance class
       DBIops:
@@ -331,14 +328,6 @@ Parameters:
   CustomDnsName:
     Default: ""
     Description: 'Use custom existing DNS name for your Data Center instance. This will take precedence over HostedZone. Please note: you must own the domain and configure it to point at the load balancer.'
-    Type: String
-  DBEngine:
-    Default: 'PostgreSQL'
-    Description: 'Database Engine to use for the application. PostgreSQL or Amazon Aurora PostgreSQL'
-    AllowedValues:
-      - 'PostgreSQL'
-      - 'Amazon Aurora PostgreSQL'
-    ConstraintDescription: Must be 'Amazon Aurora PostgreSQL' or 'PostgreSQL'.
     Type: String
   DBInstanceClass:
     Default: db.m4.large
@@ -676,7 +665,6 @@ Resources:
         ClusterNodeMin: !Ref 'ClusterNodeMin'
         ClusterNodeVolumeSize: !Ref 'ClusterNodeVolumeSize'
         CustomDnsName: !Ref 'CustomDnsName'
-        DBEngine: !Ref DBEngine
         DBInstanceClass: !Ref 'DBInstanceClass'
         DBIops: !Ref 'DBIops'
         DBMasterUserPassword: !Ref 'DBMasterUserPassword'
