@@ -22,6 +22,7 @@ Metadata:
           - DeploymentAutomationPlaybook
           - DeploymentAutomationCustomParams
           - DeploymentAutomationKeyName
+          - JiraClusterNodeRole
       - Label:
           default: Database
         Parameters:
@@ -150,6 +151,8 @@ Metadata:
         default: ASI identifier
       HostedZone:
         default: Route 53 Hosted Zone
+      JiraClusterNodeRole:
+        default: Jira Cluster Node Role
       InternetFacingLoadBalancer:
         default: Make instance internet facing
       JiraProduct:
@@ -498,6 +501,11 @@ Parameters:
     ConstraintDescription: Must be the name of an existing Route53 Hosted Zone.
     Description: The domain name of the Route53 PRIVATE Hosted Zone in which to create cnames
     Type: String
+  JiraClusterNodeRole:
+    Default: ''
+    Description: The role used for AutoScalingGroup profile. This parameter is optional and should only be used in case your AWS account doesn't have permissions to create a new role.
+    Type: String
+    ConstraintDescription: Must be a valid role. For required policies please see the resource JiraClusterNodeRoleDefault.
   InternetFacingLoadBalancer:
     Default: "true"
     AllowedValues: ["true", "false"]
@@ -631,6 +639,8 @@ Conditions:
     !Equals [!Ref DBEngine, "Amazon Aurora PostgreSQL"]
   DBEnginePostgres:
     !Equals [!Ref DBEngine, "PostgreSQL"]
+  CreateJiraClusterNodeRole:
+    !Equals [!Ref JiraClusterNodeRole, '']
 Mappings:
   AWSInstanceType2Arch:
     c4.large:
@@ -956,8 +966,9 @@ Mappings:
       shortdisplayname: '"Jira SW"'
       fulldisplayname: '"Atlassian Jira Software"'
 Resources:
-  JiraClusterNodeRole:
+  JiraClusterNodeRoleDefault:
     Type: AWS::IAM::Role
+    Condition: CreateJiraClusterNodeRole
     Properties:
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -1006,7 +1017,8 @@ Resources:
     Type: AWS::IAM::InstanceProfile
     Properties:
       Path: /
-      Roles: [!Ref JiraClusterNodeRole]
+      Roles:
+       - !If [CreateJiraClusterNodeRole, !Ref JiraClusterNodeRoleDefault, !Ref JiraClusterNodeRole]
   # Jira node config
   ClusterNodeGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
