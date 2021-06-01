@@ -1017,31 +1017,31 @@ Resources:
             Statement:
               - Action:
                   - ec2:CreateTags
+                Effect: Allow
                 Resource:
                   - !Sub "arn:${AWS::Partition}:ec2:*:${AWS::AccountId}:instance/*"
                   - !Sub "arn:${AWS::Partition}:ec2:*:${AWS::AccountId}:vpc/*"
-                Effect: Allow
               - Action:
                   - autoscaling:CreateOrUpdateTags
                   - route53:ListResourceRecordSets
+                Effect: Allow
                 Resource:
                   - !Sub "arn:${AWS::Partition}:autoscaling:*:${AWS::AccountId}:autoScalingGroup:*:autoScalingGroupName/*"
                   - !Sub "arn:${AWS::Partition}:route53:::hostedzone/*"
-                Effect: Allow
               - Action:
                   - ec2:DescribeInstances
                   - ec2:DescribeTags
                   - route53:ListHostedZones
                   - autoscaling:DescribeTags
-                Resource: "*"
                 Effect: Allow
+                Resource: "*"
               - Action: route53:ChangeResourceRecordSets
+                Effect: Allow
                 Resource:
                   - !Sub "arn:${AWS::Partition}:route53:::hostedzone/*"
                   - !Sub "arn:${AWS::Partition}:route53:::change/*"
                   - !Sub "arn:${AWS::Partition}:route53:::healthcheck/*"
                   - !Sub "arn:${AWS::Partition}:route53:::delegationset/*"
-                Effect: Allow
         - PolicyName: SSMParameterPutAccess
           PolicyDocument:
             Version: 2012-10-17
